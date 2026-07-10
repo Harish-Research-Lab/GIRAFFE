@@ -1,0 +1,25 @@
+#pragma once
+#include <stdio.h>
+#include <vector>
+using namespace std;
+
+class BoolTable
+{
+public:
+	BoolTable();
+	BoolTable(BoolTable &copied);
+	BoolTable &operator = (BoolTable const &bool1);		//Assignment operator
+	~BoolTable();
+
+	bool Read(FILE *f);			//Reads input file
+	void Write(FILE *f);		//Writes output file
+
+	//Useful functions:
+	bool GetAt(int number);						//Returns bool data value at 'number' index (zero based). If number increases the size of data_table, returns the last available value
+	double GetLinearFactorAtCurrentTime();		//Returns linear interpolation factor for current time value
+	void SetDefault(bool def);					//Assigns value def
+	void SetBoolTable(vector<bool> data);		//Sets the table of data booleanos
+private:
+	vector<bool> data_table;
+};
+

@@ -1,0 +1,85 @@
+#include <stdio.h>
+#include <math.h>
+#include <string>
+#include <chrono>
+#include <iostream>
+using namespace std;
+using namespace std::chrono;
+#include "IO.h"
+#include "Errors.h"
+#include "Monitor.h"
+#include "ConcomitantSolution.h"
+#include "PostFiles.h"
+#include "Solution.h"
+//#defines _CRTDBG_MAP_ALLOC
+//#include <stdlib.h>
+//#include <crtdbg.h>
+//#ifdef _DEBUG
+//#defines DBG_NEW new ( _NORMAL_BLOCK , __FILE__ , __LINE__ )
+//// Replace _NORMAL_BLOCK with _CLIENT_BLOCK if you want the
+//// allocations to be of _CLIENT_BLOCK type
+//#else
+//#defines DBG_NEW new
+//#endif
+
+//Global variables
+Database db;
+IO io;									//Cria��o of object IO for input and output of data
+
+int main(int argc, char* argv[])
+{
+#ifdef _WIN32
+	_setmaxstdio(2000);
+#endif
+	//_CrtSetDbgFlag(_CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF);
+	Errors errors;							//Cria��o of object Errors for check inconsistencia of data
+	bool readOK = io.ReadFile(argc,argv);	//L� input file
+	bool checkOK = errors.CheckErrors();	//Checks errors
+	if (readOK == true && checkOK == true)
+	{
+		db.myprintf("GIRAFFE simulation output report. Version %s.\nFile name: %s\n\n", db.version, db.file_name);
+		db.PreCalc();						//Performs pre-calculations
+		//Execution time
+		high_resolution_clock::time_point t1 = high_resolution_clock::now();
+		//Start Monitor
+		if (db.monitor_exist == true)
+			db.monitor->StartMonitor();
+		//Start Concomitant Solution
+		if (db.concomitant_solution_exist == true)
+			db.concomitant_solution->StartConcomitantSolution();
+		//Solution
+		if (db.solution_exist == true)
+		{
+			db.post_files->StartPostFiles(db.number_solutions + 1);	//solu��o combinada - start
+			//Iterates over solu��es sequenciais
+			bool converged = true;
+			int i = 0;
+			while (i < db.number_solutions && converged == true)
+			{
+				db.post_files->StartPostFiles(i + 1);
+				db.current_solution_number = i + 1;
+				converged = db.solution[i]->Solve();
+				db.post_files->EndPostFiles(i + 1);
+				i++;
+			}
+			db.post_files->EndPostFiles(db.number_solutions + 1);	//solu��o combinada - end
+		}
+		//End Monitor
+		if (db.monitor_exist == true)
+			db.monitor->EndMonitor();
+		//End Concomitant Solution
+		if (db.concomitant_solution_exist == true)
+			db.concomitant_solution->EndConcomitantSolution();
+		//Execution time
+		high_resolution_clock::time_point t2 = high_resolution_clock::now();
+		auto duration = std::chrono::duration_cast<std::chrono::microseconds>(t2 - t1).count();
+		db.myprintf("\nTotal solution time:\t   %lf sec.\n", duration / 1e6);
+		//Writes output file
+		io.WriteFile();					
+	}
+	cout << "\nGiraffe execution has finished.\n"; 
+	if (argc <= 1)
+		system("pause");
+	return 0;
+	
+}
