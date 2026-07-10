@@ -209,6 +209,16 @@ else()
 	target_compile_options(${PROJECT_NAME}
 	  PRIVATE
 		-Wall -Wextra -pedantic # '-Werror' to treat warnings as errors
+		# Legacy codebase was only ever built with MSVC, which is far more lax
+		# about these; silence the categories that just add noise without
+		# flagging real bugs, keep the rest.
+		-Wno-unused-variable
+		-Wno-unused-but-set-variable
+		-Wno-unused-parameter
+		-Wno-sign-compare
+		-Wno-format-security
+		-Wno-deprecated-declarations
+		-Wno-invalid-utf8
 		-Xpreprocessor -fopenmp
 		# The codebase was only ever built with MSVC, whose standard headers
 		# transitively pull in <cstdlib>/<cfloat>/etc. libc++/libstdc++ don't,
