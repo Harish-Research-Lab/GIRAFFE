@@ -18,7 +18,7 @@ static inline void dgbtrs(char *trans, int *n, int *kl, int *ku, int *nrhs, doub
 }
 #endif
 
-//Constructor Padr�o
+//Standard constructor
 BandMatrix::BandMatrix(void)
 {
 	m_lines_deleted = true;
@@ -44,10 +44,10 @@ BandMatrix::BandMatrix(long band_s,long band_i,long columns)
 	if(!alloc())
 		printf("Not possible to alloc matrix\n");
 }
-//Constructor of c�pia
+//Constructor of copy
 BandMatrix::BandMatrix(BandMatrix &copied)
 {
-	//Checks dimens�es of the matrix - if necessary, does re-aloca��o
+	//Checks dimensions of the matrix - if necessary, does re-alocation
 	//if (copied.m_alloced_lines != m_alloced_lines)
 //	{
 		flush();

@@ -51,7 +51,7 @@ bool AerodynamicData::Read(FILE *f)
 		fscanf(f, "%s", s);
 		if (strcmp(s, "(Alpha/CD)"))
 			fsetpos(f, &pos);	//turn the position previous
-		//Aloca��o and reading of the table
+		//Allocation and reading of the table
 		CD = new Table(np, 1);
 		CD->Read(f);
 	}
